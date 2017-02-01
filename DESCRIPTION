@@ -1,0 +1,13 @@
+Package: rankAFT
+Type: Package
+Title: Estimation for Rank Based Accelerated Failure Time Model
+Version: 0.1.0
+Author: Patrick Hilden
+Maintainer: Patrick Hilden <hildenp@mskcc.org>
+Description: Functions to estimate the parameters associated with the rank accelerated failure time model as described by Heller (2007)
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Imports: Rcpp (>= 0.12.9), dfoptim (>= 2016.7-1), rootSolve (>= 1.7)
+LinkingTo: Rcpp
+RoxygenNote: 6.0.0
