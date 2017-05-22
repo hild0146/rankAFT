@@ -50,7 +50,7 @@ rankAFT <- function(x.mat, surv.time, surv.cens) {
                          beta_res = beta.res,
                          x_mat = x.mat)
 
-    comb <- comb * nrow(x.mat) ^ (-3/2)
+    comb <- comb * nrow(x.mat) ^ (-2)
 
     sum(abs(comb))
   }
@@ -94,7 +94,7 @@ rankAFT <- function(x.mat, surv.time, surv.cens) {
                            x_mat = x.mat,
                            h = h)
 
-    comb <- comb * nrow(x.mat) ^ (-3/2)
+    comb <- comb * nrow(x.mat) ^ (-2)
 
     comb
   }
@@ -133,9 +133,11 @@ rankAFT <- function(x.mat, surv.time, surv.cens) {
 
   var.beta <- solve(A.n) %*% V.n %*% solve(A.n)
 
-  out <- list('est' = beta.final,
-              'var' = var.beta,
-              'opt.val' = opt.res$value)
+  out <- list(est = beta.final,
+              var = var.beta,
+              opt.prelim = opt.res$value,
+              h.prelim = h.prelim,
+              h.final = h.final)
 
   return(out)
 

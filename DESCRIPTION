@@ -10,4 +10,4 @@ Encoding: UTF-8
 LazyData: true
 Imports: Rcpp (>= 0.12.9), dfoptim (>= 2016.7-1), rootSolve (>= 1.7)
 LinkingTo: Rcpp
-RoxygenNote: 6.0.0
+RoxygenNote: 6.0.1
