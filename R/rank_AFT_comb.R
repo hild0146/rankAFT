@@ -59,14 +59,14 @@ rankAFT <- function(x.mat, surv.time, surv.cens) {
   #     of parameters
 
   if(ncol(x.mat) > 1) {
-    opt.res <- dfoptim::nmk(par = rep(0, ncol(x.mat)),
+    opt.prelim <- dfoptim::nmk(par = rep(0, ncol(x.mat)),
                             fn = bandwidth.optim,
                             x.mat = x.mat,
                             surv.time = surv.time,
                             surv.cens = surv.cens)
   } else {
 
-    opt.res <- optim(par = 0,
+    opt.prelim <- optim(par = 0,
                      lower = - 10,
                      upper = 10,
                      method = 'Brent',
@@ -77,7 +77,7 @@ rankAFT <- function(x.mat, surv.time, surv.cens) {
   }
 
 
-  beta.prelim <- opt.res$par
+  beta.prelim <- opt.prelim$par
 
   res.prelim <- log(surv.time) - x.mat %*% beta.prelim
 
@@ -99,12 +99,14 @@ rankAFT <- function(x.mat, surv.time, surv.cens) {
     comb
   }
 
-  beta.final <- rootSolve::multiroot(start = beta.prelim,
+  opt.final <- rootSolve::multiroot(start = beta.prelim,
                                      f = aft.optim,
                                      x.mat = x.mat,
                                      surv.time = surv.time,
                                      surv.cens = surv.cens,
-                                     h = h.prelim)$root
+                                     h = h.prelim)
+  
+  beta.final <- opt.final$root
 
   res.final <- log(surv.time) - x.mat %*% beta.final
 
@@ -135,8 +137,9 @@ rankAFT <- function(x.mat, surv.time, surv.cens) {
 
   out <- list(est = beta.final,
               var = var.beta,
-              opt.prelim = opt.res$value,
+              opt.prelim = opt.prelim,
               h.prelim = h.prelim,
+              opt.final = opt.final,
               h.final = h.final)
 
   return(out)
