@@ -4,7 +4,7 @@
 \alias{rankAFT}
 \title{Parameter Estimation for Rank Based Accelerated Failure Time Model}
 \usage{
-rankAFT(x.mat, surv.time, surv.cens)
+rankAFT(x.mat, surv.time, surv.cens, method = 1)
 }
 \arguments{
 \item{x.mat}{design matrix containing parameters of interest}
