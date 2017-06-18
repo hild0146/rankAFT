@@ -60,3 +60,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"rankAFT_fyg_rit_orig", (DL_FUNC) &rankAFT_fyg_rit_orig, 3},
+    {"rankAFT_fyg_rit_smooth", (DL_FUNC) &rankAFT_fyg_rit_smooth, 4},
+    {"rankAFT_A_n_calc", (DL_FUNC) &rankAFT_A_n_calc, 4},
+    {"rankAFT_V_n_calc", (DL_FUNC) &rankAFT_V_n_calc, 4},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_rankAFT(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}

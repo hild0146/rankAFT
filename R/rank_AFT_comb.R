@@ -38,7 +38,7 @@
 #'
 #' @export rankAFT
 
-rankAFT <- function(x.mat, surv.time, surv.cens, method = 1) {
+rankAFT <- function(x.mat, surv.time, surv.cens, method, maxit = 2000) {
 
   # ----- initial parameter estimates and bandwidth -----
 
@@ -55,15 +55,18 @@ rankAFT <- function(x.mat, surv.time, surv.cens, method = 1) {
     sum(abs(comb))
   }
 
-  # --- use either nelder-mead or brent optimization depending on the number
-  #     of parameters
+  # use either nelder-mead or brent optimization depending on the number of
+  # parameters
 
   if(ncol(x.mat) > 1) {
-    opt.prelim <- dfoptim::nmk(par = rep(0, ncol(x.mat)),
-                            fn = bandwidth.optim,
-                            x.mat = x.mat,
-                            surv.time = surv.time,
-                            surv.cens = surv.cens)
+
+    opt.prelim <- optim(par = rep(0, ncol(x.mat)),
+                        method = 'Nelder-Mead',
+                        fn = bandwidth.optim,
+                        x.mat = x.mat,
+                        surv.time = surv.time,
+                        surv.cens = surv.cens)
+
   } else {
 
     opt.prelim <- optim(par = 0,
@@ -76,7 +79,6 @@ rankAFT <- function(x.mat, surv.time, surv.cens, method = 1) {
                      surv.cens = surv.cens)
   }
 
-
   beta.prelim <- opt.prelim$par
 
   res.prelim <- log(surv.time) - x.mat %*% beta.prelim
@@ -84,69 +86,36 @@ rankAFT <- function(x.mat, surv.time, surv.cens, method = 1) {
   h.prelim <- sd(res.prelim[surv.cens == 1]) * nrow(x.mat) ^ (-0.26)
 
   # --- final parameter estimates -----
-  
-  if(method == 1){
-    
-    aft.optim <- function(beta.est, x.mat, surv.time, surv.cens, h){
-      
-      beta.res <- log(surv.time) - x.mat %*% beta.est
-      
-      comb <- fyg_rit_smooth(surv_cens = surv.cens,
-                             beta_res = beta.res,
-                             x_mat = x.mat,
-                             h = h)
-      
-      comb <- comb * nrow(x.mat) ^ (-2)
-      
-      comb
-    }
-    
-    opt.final <- rootSolve::multiroot(start = beta.prelim,
-                                      f = aft.optim,
-                                      x.mat = x.mat,
-                                      surv.time = surv.time,
-                                      surv.cens = surv.cens,
-                                      h = h.prelim)
-    
-    beta.final <- opt.final$root
-    
-    res.final <- log(surv.time) - x.mat %*% beta.final
-    
-    h.final <- sd(res.final[surv.cens == 1]) * nrow(x.mat) ^ (-0.26)
-    
-  } else {
-    
-    aft.optim <- function(beta.est, x.mat, surv.time, surv.cens, h){
-      
-      beta.res <- log(surv.time) - x.mat %*% beta.est
-      
-      comb <- fyg_rit_smooth(surv_cens = surv.cens,
-                             beta_res = beta.res,
-                             x_mat = x.mat,
-                             h = h)
-      
-      comb <- comb * nrow(x.mat) ^ (-2)
-      
-      sum(abs(comb))
-    }
-    
-    opt.final <- optim(par = beta.prelim,
-                       fn = aft.optim,
-                       method = 'Nelder-Mead',
-                       x.mat = x.mat,
-                       surv.time = surv.time,
-                       surv.cens = surv.cens,
-                       h = h.prelim,
-                       control = list(maxit = 2000))
-    
-    beta.final <- opt.final$par
-    
-    res.final <- log(surv.time) - x.mat %*% beta.final
-    
-    h.final <- sd(res.final[surv.cens == 1]) * nrow(x.mat) ^ (-0.26)
 
+  aft.optim <- function(beta.est, x.mat, surv.time, surv.cens, h){
+
+    beta.res <- log(surv.time) - x.mat %*% beta.est
+
+    comb <- fyg_rit_smooth(surv_cens = surv.cens,
+                           beta_res = beta.res,
+                           x_mat = x.mat,
+                           h = h)
+
+    comb <- comb * nrow(x.mat) ^ (-2)
+
+    sum(abs(comb))
   }
-  
+
+  opt.final <- optim(par = beta.prelim,
+                     fn = aft.optim,
+                     method = method,
+                     x.mat = x.mat,
+                     surv.time = surv.time,
+                     surv.cens = surv.cens,
+                     h = h.prelim,
+                     control = list(maxit = maxit))
+
+  beta.final <- opt.final$par
+
+  res.final <- log(surv.time) - x.mat %*% beta.final
+
+  h.final <- sd(res.final[surv.cens == 1]) * nrow(x.mat) ^ (-0.26)
+
   # --- variance calculation
 
   A.n <- A_n_calc(surv_cens = surv.cens,
