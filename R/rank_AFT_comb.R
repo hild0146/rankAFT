@@ -123,7 +123,7 @@ rankAFT <- function(x.mat, surv.time, surv.cens, method, maxit = 2000) {
                   x_mat = x.mat,
                   h = h.final)
 
-  A.n[upper.tri(A.n)] <- A.n[lower.tri(A.n)]
+  A.n[upper.tri(A.n)] <- t(A.n)[upper.tri(t(A.n))]
 
   A.n <- A.n * h.final ^ (-1) * nrow(x.mat) ^ (-3/2)
 
@@ -133,8 +133,8 @@ rankAFT <- function(x.mat, surv.time, surv.cens, method, maxit = 2000) {
                   x_mat = x.mat,
                   h = h.final)
 
-  V.n[upper.tri(V.n)] <- V.n[lower.tri(V.n)]
-
+  V.n[upper.tri(V.n)] <- t(V.n)[upper.tri(t(V.n))]
+  
   V.n <- V.n * nrow(x.mat) ^ (-3)
 
   var.beta <- solve(A.n) %*% V.n %*% solve(A.n)
